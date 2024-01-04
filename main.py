@@ -76,6 +76,7 @@ def scrapePage(url):
             # restaurant telephone number
             try:
                 telephone_number = driver.find_element(By.XPATH, "//a/span[starts-with(text(), '+')]").text
+                telephone_number = driver.find_element(By.CSS_SELECTOR, "a[data-dtype='d3ph'] span").text
             except NoSuchElementException as e:
                 print(e)
             if not telephone_number:
