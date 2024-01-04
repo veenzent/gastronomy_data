@@ -51,6 +51,8 @@ def scrapePage(url):
                 name = driver.find_element(By.XPATH, "//h2/span[not(@*)]").text
             except NoSuchElementException as e:
                 print(e)
+            if not name:
+                name = "-"
             sleep(2)
 
             # restaurant address
@@ -58,6 +60,8 @@ def scrapePage(url):
                 address = driver.find_element(By.CSS_SELECTOR, "span.LrzXr").text
             except NoSuchElementException as e:
                 print(e)
+            if not address:
+                address = "-"
             sleep(2)
 
             # restaurant nationality
@@ -65,12 +69,17 @@ def scrapePage(url):
                 nationality = driver.find_element(By.CSS_SELECTOR, "div.zloOqf span.YhemCb:nth-child(2)").text
             except NoSuchElementException as e:
                 print(e)
+            if not nationality:
+                nationality = "-"
+            sleep(2)
 
             # restaurant telephone number
             try:
                 telephone_number = driver.find_element(By.XPATH, "//a/span[starts-with(text(), '+')]").text
             except NoSuchElementException as e:
                 print(e)
+            if not telephone_number:
+                telephone_number = "-"
             sleep(2)
 
             # restaurant website url
@@ -78,6 +87,8 @@ def scrapePage(url):
                 website_url = driver.find_element(By.CSS_SELECTOR, "a.mI8Pwc").get_attribute("href")
             except NoSuchElementException as e:
                 print(e)
+            if not website_url:
+                website_url = "-"
             sleep(3)
 
             # restaurant instagram link
@@ -85,6 +96,8 @@ def scrapePage(url):
                 insta_link = driver.find_element(By.CSS_SELECTOR, "g-link a").get_attribute("href")
             except NoSuchElementException as e:
                 print(e)
+            if not insta_link:
+                insta_link = "-"
             sleep(3)
 
             # restaurant facebook link
@@ -92,6 +105,8 @@ def scrapePage(url):
                 facebook = driver.find_element(By.CSS_SELECTOR, "g-link a").get_attribute("href")
             except NoSuchElementException as e:
                 print(e)
+            if not facebook:
+                facebook = "-"
             sleep(2)
 
             # restaurant service options
@@ -99,6 +114,8 @@ def scrapePage(url):
                 service_options = driver.find_element(By.XPATH, "//div[@style='margin:8px 16px']").text
             except NoSuchElementException as e:
                 print(e)
+            if not service_options:
+                service_options = "-"
 
             data = {
                 "S/N": str(f"{i+1}"),
@@ -135,6 +152,9 @@ app = FastAPI(title="G-Maps Gastronomy Data")
 
 @app.get("/")
 async def home():
+    """
+    Click on "Try it out" button at the top right of every route, provide needed details and click on "Execute" to run the code
+    """
     return {
         1: "Steps to scrape gastronomy data",
         2: "Query your browser manually for city you want gastronomy data on e.g restaurants in Germany",
@@ -143,7 +163,8 @@ async def home():
         5: "Sampled_url = https://www.google.com/search?client=firefox-b-d&sca_esv=594603375&tbs=lrf:!1m4!1u3!2m2!3m1!1e1!1m4!1u5!2m2!5m1!1sgcid_3german_1restaurant!1m4!1u5!2m2!5m1!1sgcid_3indian_1restaurant!1m4!1u2!2m2!2m1!1e1!1m4!1u1!2m2!1m1!1e1!1m4!1u1!2m2!1m1!1e2!2m1!1e2!2m1!1e5!2m1!1e1!2m1!1e3!3sIAEqAkRF,lf:1,lf_ui:9&tbm=lcl&sxsrf=AM9HkKnqdXFj_FVNzgEjVYXigqgBUOtXnw:1703948168668&q=restaurants%20in%20germany&rflfq=1&num=10&sa=X&ved=2ahUKEwinmbzKtbeDAxWfS0EAHQLRDoEQjGp6BAgXEAE&biw=1525&bih=760&dpr=0.9&rlst=f#rlfi=hd:;si:;mv:[[52.809863099999994,14.150356],[47.8622162,6.5175032]];tbs:lrf:!1m4!1u3!2m2!3m1!1e1!1m4!1u5!2m2!5m1!1sgcid_3german_1restaurant!1m4!1u5!2m2!5m1!1sgcid_3indian_1restaurant!1m4!1u2!2m2!2m1!1e1!1m4!1u1!2m2!1m1!1e1!1m4!1u1!2m2!1m1!1e2!2m1!1e2!2m1!1e5!2m1!1e1!2m1!1e3!3sIAEqAkRF,lf:1,lf_ui:9",
         6: "Paste url in url-field of scrape-Page route",
         7: "Click on Execute to scrape data",
-        8: "The scraping would take some time before it completes so as to avoid Googles suspicion and captcha test"
+        8: "The scraping would take some time before it completes so as to avoid Googles suspicion and captcha test",
+        9: "Append /docs to this page's url to continue"
     }
 
 @app.get("/data-via-page-url")
@@ -157,6 +178,8 @@ async def scrape_page(url: str):
 async def download_data():
     filename = "gastronomy_data.csv"
     try:
+        if not gastronomy_data:
+            return {"error": "Data not scraped yet"}
         response = StreamingResponse(
             gastronomy_data_csv(),
             media_type="text/csv",
