@@ -52,7 +52,7 @@ def scrapePage(url):
             except NoSuchElementException as e:
                 print(e)
             if not name:
-                name = "-"
+                name = "Nil"
             sleep(2)
 
             # restaurant address
@@ -61,7 +61,7 @@ def scrapePage(url):
             except NoSuchElementException as e:
                 print(e)
             if not address:
-                address = "-"
+                address = "Nil"
             sleep(2)
 
             # restaurant nationality
@@ -70,17 +70,17 @@ def scrapePage(url):
             except NoSuchElementException as e:
                 print(e)
             if not nationality:
-                nationality = "-"
+                nationality = "Nil"
             sleep(2)
 
             # restaurant telephone number
             try:
                 telephone_number = driver.find_element(By.XPATH, "//a/span[starts-with(text(), '+')]").text
-                telephone_number = driver.find_element(By.CSS_SELECTOR, "a[data-dtype='d3ph'] span").text
+                # telephone_number = driver.find_element(By.CSS_SELECTOR, "a[data-dtype='d3ph'] span").text
             except NoSuchElementException as e:
                 print(e)
             if not telephone_number:
-                telephone_number = "-"
+                telephone_number = "Nil"
             sleep(2)
 
             # restaurant website url
@@ -89,7 +89,7 @@ def scrapePage(url):
             except NoSuchElementException as e:
                 print(e)
             if not website_url:
-                website_url = "-"
+                website_url = "Nil"
             sleep(3)
 
             # restaurant instagram link
@@ -98,7 +98,7 @@ def scrapePage(url):
             except NoSuchElementException as e:
                 print(e)
             if not insta_link:
-                insta_link = "-"
+                insta_link = "Nil"
             sleep(3)
 
             # restaurant facebook link
@@ -107,7 +107,7 @@ def scrapePage(url):
             except NoSuchElementException as e:
                 print(e)
             if not facebook:
-                facebook = "-"
+                facebook = "Nil"
             sleep(2)
 
             # restaurant service options
@@ -116,7 +116,7 @@ def scrapePage(url):
             except NoSuchElementException as e:
                 print(e)
             if not service_options:
-                service_options = "-"
+                service_options = "Nil"
 
             data = {
                 "S/N": str(f"{i+1}"),
