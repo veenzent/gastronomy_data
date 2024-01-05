@@ -79,9 +79,9 @@ def scrapePage(url):
                 # telephone_number = driver.find_element(By.CSS_SELECTOR, "a[data-dtype='d3ph'] span").text
             except NoSuchElementException as e:
                 print(e)
+            sleep(2)
             if not telephone_number:
                 telephone_number = "Nil"
-            sleep(2)
 
             # restaurant website url
             try:
@@ -172,7 +172,11 @@ async def home():
 async def scrape_page(url: str):
     if not url:
         raise HTTPException(status_code=404, detail="Input a url to scrape data")
-    data = scrapePage(url)
+    try:
+        data = scrapePage(url)
+    except Exception as e:
+        print(e)
+        return e
     return data
 
 @app.get("/download")
