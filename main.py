@@ -1,4 +1,3 @@
-import csv
 from time import sleep
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
@@ -37,6 +36,7 @@ def scrapePage(url):
     for i in range(5):
         sleep(1)
         restaurant_link = driver.find_elements(By.CSS_SELECTOR, "a.vwVdIc")
+        print(f"Found {len(restaurant_link)} restaurants")
         sleep(5)
         restaurant_link = restaurant_link[i]
         try:
