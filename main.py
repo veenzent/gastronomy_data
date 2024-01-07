@@ -83,10 +83,15 @@ def scrapePage(url):
             # restaurant telephone number
             try:
                 telephone_number = page.select("span.LrzXr a span")[0].text
-                # telephone_number = driver.find_element(By.XPATH, "//a/span[starts-with(text(), '+')]").text
+                print(f"Telephone Number: {telephone_number}")
+            except Exception:
+                sleep(1)
+                telephone_number = driver.find_element(By.XPATH, "//a/span[starts-with(text(), '+')]").text
                 print(f"Telephone Number: {telephone_number}")
             except Exception as e:
                 print(e)
+                telephone_number = "Nil"
+                print(telephone_number)
             if not telephone_number:
                 telephone_number = "Nil"
 
