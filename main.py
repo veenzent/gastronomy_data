@@ -24,7 +24,8 @@ driver = webdriver.Chrome(options=chrome_options)
 # driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
 
-# url = "https://www.google.com/search?client=firefox-b-d&sca_esv=594603375&tbs=lrf:!1m4!1u3!2m2!3m1!1e1!1m4!1u5!2m2!5m1!1sgcid_3german_1restaurant!1m4!1u5!2m2!5m1!1sgcid_3indian_1restaurant!1m4!1u2!2m2!2m1!1e1!1m4!1u1!2m2!1m1!1e1!1m4!1u1!2m2!1m1!1e2!2m1!1e2!2m1!1e5!2m1!1e1!2m1!1e3!3sIAEqAkRF,lf:1,lf_ui:9&tbm=lcl&sxsrf=AM9HkKnqdXFj_FVNzgEjVYXigqgBUOtXnw:1703948168668&q=restaurants%20in%20germany&rflfq=1&num=10&sa=X&ved=2ahUKEwinmbzKtbeDAxWfS0EAHQLRDoEQjGp6BAgXEAE&biw=1525&bih=760&dpr=0.9&rlst=f#rlfi=hd:;si:;mv:[[52.809863099999994,14.150356],[47.8622162,6.5175032]];tbs:lrf:!1m4!1u3!2m2!3m1!1e1!1m4!1u5!2m2!5m1!1sgcid_3german_1restaurant!1m4!1u5!2m2!5m1!1sgcid_3indian_1restaurant!1m4!1u2!2m2!2m1!1e1!1m4!1u1!2m2!1m1!1e1!1m4!1u1!2m2!1m1!1e2!2m1!1e2!2m1!1e5!2m1!1e1!2m1!1e3!3sIAEqAkRF,lf:1,lf_ui:9"
+# urll = "https://www.google.com/search?client=firefox-b-d&sca_esv=594603375&tbs=lrf:!1m4!1u3!2m2!3m1!1e1!1m4!1u5!2m2!5m1!1sgcid_3german_1restaurant!1m4!1u5!2m2!5m1!1sgcid_3indian_1restaurant!1m4!1u2!2m2!2m1!1e1!1m4!1u1!2m2!1m1!1e1!1m4!1u1!2m2!1m1!1e2!2m1!1e2!2m1!1e5!2m1!1e1!2m1!1e3!3sIAEqAkRF,lf:1,lf_ui:9&tbm=lcl&sxsrf=AM9HkKnqdXFj_FVNzgEjVYXigqgBUOtXnw:1703948168668&q=restaurants%20in%20germany&rflfq=1&num=10&sa=X&ved=2ahUKEwinmbzKtbeDAxWfS0EAHQLRDoEQjGp6BAgXEAE&biw=1525&bih=760&dpr=0.9&rlst=f#rlfi=hd:;si:;mv:[[52.809863099999994,14.150356],[47.8622162,6.5175032]];tbs:lrf:!1m4!1u3!2m2!3m1!1e1!1m4!1u5!2m2!5m1!1sgcid_3german_1restaurant!1m4!1u5!2m2!5m1!1sgcid_3indian_1restaurant!1m4!1u2!2m2!2m1!1e1!1m4!1u1!2m2!1m1!1e1!1m4!1u1!2m2!1m1!1e2!2m1!1e2!2m1!1e5!2m1!1e1!2m1!1e3!3sIAEqAkRF,lf:1,lf_ui:9"
+# mainz = "https://www.google.com/search?client=firefox-b-d&sca_esv=596374102&tbs=lf:1,lf_ui:9&tbm=lcl&sxsrf=ACQVn0-2G5sPef-vv6QYCfU0u1cJpeTLYw:1704641224806&q=mainz+finthen+restaurant&rflfq=1&num=10&sa=X&ved=2ahUKEwil77G1y8uDAxUvaUEAHT3CDdgQjGp6BAgSEAE&biw=1525&bih=760&dpr=0.9#rlfi=hd:;si:;mv:[[49.997862299999994,8.1819598],[49.9712104,8.1506037]];tbs:lrf:!1m4!1u3!2m2!3m1!1e1!1m4!1u5!2m2!5m1!1sgcid_3pizza_1restaurant!1m4!1u5!2m2!5m1!1sgcid_3german_1restaurant!1m4!1u2!2m2!2m1!1e1!2m1!1e2!2m1!1e5!2m1!1e3!3sIAEqAkRF,lf:1,lf_ui:9"
 
 gastronomy_data = []
 
@@ -35,11 +36,21 @@ def scrapePage(url):
     sleep(5)
 
     for i in range(5):
-        sleep(1)
-        restaurant_link = driver.find_elements(By.CSS_SELECTOR, "a.vwVdIc")
-        print(f"Scraping {i+1} of {len(restaurant_link)} restaurants")
-        sleep(3)
-        restaurant = restaurant_link[i]
+        try:
+            sleep(1)
+            restaurant_link = driver.find_elements(By.CSS_SELECTOR, "a.vwVdIc")
+            sleep(7)
+            print(f"Scraping {i+1} of {len(restaurant_link)} restaurants")
+            restaurant = restaurant_link[i]
+        except IndexError:
+            sleep(1)
+            restaurant_link = driver.find_elements(By.CSS_SELECTOR, "a.vwVdIc")
+            sleep(7)
+            print(f"Scraping {i+1} of {len(restaurant_link)} restaurants")
+            restaurant = restaurant_link[i]
+        except Exception:
+            return {"Network error": "Check you internet connection"}
+
         
         # click and wait till the clicked restaurant main page loads
         restaurant.click()
@@ -54,46 +65,46 @@ def scrapePage(url):
             try:
                 name =  page.select("h2.qrShPb span")[0].text
                 print(f"Name: {name}")
-                # name = driver.find_element(By.XPATH, "//h2/span[not(@*)]").text
-            except Exception as e:
+            except IndexError:
+                name = driver.find_element(By.XPATH, "//h2/span[not(@*)]").text
+                print(f"Name: {name}")
+            except NoSuchElementException as e:
                 print(e)
-            if not name:
                 name = "Nil"
 
             # restaurant address
             try:
-                # address = driver.find_element(By.CSS_SELECTOR, "span.LrzXr").text
                 address = page.select("span.LrzXr")[0].text
                 print(f"Address: {address}")
-            except Exception as e:
+            except IndexError:
+                address = driver.find_element(By.CSS_SELECTOR, "span.LrzXr").text
+                print(f"Address: {address}")
+            except NoSuchElementException as e:
                 print(e)
-            if not address:
                 address = "Nil"
 
             # restaurant nationality
             try:
                 nationality = page.select("span.YhemCb")[1].text
-                # nationality = driver.find_element(By.CSS_SELECTOR, "div.zloOqf span.YhemCb:nth-child(2)").text
                 print(f"Nationality: {nationality}")
-            except Exception as e:
+            except IndexError:
+                nationality = driver.find_element(By.CSS_SELECTOR, "div.zloOqf span.YhemCb:nth-child(2)").text
+                print(f"Nationality: {nationality}")
+            except NoSuchElementException as e:
                 print(e)
-            if not nationality:
                 nationality = "Nil"
 
             # restaurant telephone number
             try:
                 telephone_number = page.select("span.LrzXr a span")[0].text
                 print(f"Telephone Number: {telephone_number}")
-            except Exception:
-                sleep(1)
+            except IndexError:
                 telephone_number = driver.find_element(By.XPATH, "//a/span[starts-with(text(), '+')]").text
                 print(f"Telephone Number: {telephone_number}")
-            except Exception as e:
+            except NoSuchElementException as e:
                 print(e)
                 telephone_number = "Nil"
                 print(telephone_number)
-            if not telephone_number:
-                telephone_number = "Nil"
 
             # restaurant website url
             try:
@@ -101,41 +112,43 @@ def scrapePage(url):
                 print(f"Website: {website_url}")
             except NoSuchElementException as e:
                 print(e)
-            if not website_url:
                 website_url = "Nil"
 
             # restaurant instagram link
             try:
-                insta_link = driver.find_element(By.XPATH, "//g-link/a[starts-with(@href, 'https://www.instagram.com/')]").get_attribute("href")
                 # insta_link = driver.find_element(By.CSS_SELECTOR, "g-link a").get_attribute("href")
-                # insta_link = page.select("g-link a")[0]["href"]
+                insta_link = driver.find_element(By.XPATH, "//g-link/a[starts-with(@href, 'https://www.instagram.com/')]").get_attribute("href")
                 print(f"Instagram Link: {insta_link}")
-            except NoSuchElementException as e:
+            except NoSuchElementException:
+                insta_link = page.select("g-link a")[0]["href"]
+                print(f"Instagram Link: {insta_link}")
+            except IndexError as e:
                 print(e)
-            if not insta_link:
                 insta_link = "Nil"
 
             # restaurant facebook link
             try:
                 facebook_link = driver.find_element(By.XPATH, "//g-link/a[starts-with(@href, 'https://www.facebook.com/')]").get_attribute("href")
                 # facebook = driver.find_element(By.CSS_SELECTOR, "g-link a").get_attribute("href")
-                # facebook_link = page.select("g-link a")[1]["href"]
                 print(f"Facebool Link: {facebook_link}")
-            except NoSuchElementException as e:
-                print(e)
-            if not facebook_link:
+            except NoSuchElementException:
+                facebook_link = page.select("g-link a")[1]["href"]
+                print(f"Facebool Link: {facebook_link}")
+            except IndexError as e:
                 facebook_link = "Nil"
+                print(e)
 
             # restaurant service options
             try:
                 service_options = driver.find_element(By.XPATH, "//div[@style='margin:8px 16px']").text
-                # service_options = page.find("div", {"style": "margin:8px 16px", "data-ved": "2ahUKEwjY1ICtsMmDAxWY3gIHHQ0MD7IQ8_cGegQIIBAA", "data-hveid": "CCAQAA"}).get_text(strip=True)
                 service_options = service_options.split(":")[1].strip()
                 print(f"service options: {service_options}")
-            except NoSuchElementException as e:
-                print(e)
-            if not service_options:
+            except NoSuchElementException:
+                service_options = page.find("div", {"style": "margin:8px 16px", "data-ved": "2ahUKEwjY1ICtsMmDAxWY3gIHHQ0MD7IQ8_cGegQIIBAA", "data-hveid": "CCAQAA"}).get_text(strip=True)
+                print(f"service options: {service_options}")
+            except IndexError as e:
                 service_options = "Nil"
+                print(e)
 
             data = {
                 "S/N": str(f"{i+1}"),
@@ -159,7 +172,7 @@ def scrapePage(url):
 
     driver.quit()
     return gastronomy_data
-
+# scrapePage(mainz)
 
 def gastronomy_data_csv():
     header = ["S/N", "Name", "Address", "Nationality", "Telephone_Number", "Website_url", "Instagram_link", "Facebook", "Service_options"]
