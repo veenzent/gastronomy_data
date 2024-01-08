@@ -30,33 +30,31 @@ driver = webdriver.Chrome(options=chrome_options)
 gastronomy_data = []
 
 def scrapePage(url):
+    wait = WebDriverWait(driver, 10)
     print("Fetching url...")
     driver.get(url)
     print("URL fetched")
     sleep(5)
 
     for i in range(5):
-        try:
-            sleep(1)
-            restaurant_link = driver.find_elements(By.CSS_SELECTOR, "a.vwVdIc")
-            sleep(7)
-            print(f"Scraping {i+1} of {len(restaurant_link)} restaurants")
-            restaurant = restaurant_link[i]
-        except IndexError:
-            sleep(1)
-            restaurant_link = driver.find_elements(By.CSS_SELECTOR, "a.vwVdIc")
-            sleep(7)
-            print(f"Scraping {i+1} of {len(restaurant_link)} restaurants")
-            restaurant = restaurant_link[i]
-        except Exception:
-            return {"Network error": "Check you internet connection"}
+        sleep(2)
+        # retry mechanism for error sake
+        for attempt in range(3):
+            try:
+                restaurants_links = wait.until(EC.visibility_of_all_elements_located(locator=(By.CSS_SELECTOR, "a.vwVdIc")))
+                # driver.find_elements(By.CSS_SELECTOR, "a.vwVdIc")
+                sleep(10)
+                print(f"Scraping {i+1} of {len(restaurants_links)} restaurants")
+                restaurant = restaurants_links[i]
+                break
+            except Exception as e:
+                print(f"Attempt {attempt+1} to get restaurants failed: {e}")
+                if attempt < 2:
+                    sleep(3)
 
-        
         # click and wait till the clicked restaurant main page loads
         restaurant.click()
-        WebDriverWait(driver, 10).until(
-            EC.visibility_of_element_located((By.CSS_SELECTOR, "div.kp-header"))
-        )
+        wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, "div.kp-header")))
 
         page = soup(driver.page_source, "html.parser")
 
@@ -80,63 +78,93 @@ def scrapePage(url):
                 address = driver.find_element(By.CSS_SELECTOR, "span.LrzXr").text
                 print(f"Address: {address}")
             except NoSuchElementException as e:
-                print(e)
+                print("Element not found")
                 address = "Nil"
 
             # restaurant nationality
-            try:
-                nationality = page.select("span.YhemCb")[1].text
-                print(f"Nationality: {nationality}")
-            except IndexError:
-                nationality = driver.find_element(By.CSS_SELECTOR, "div.zloOqf span.YhemCb:nth-child(2)").text
-                print(f"Nationality: {nationality}")
-            except NoSuchElementException as e:
-                print(e)
-                nationality = "Nil"
+            for attempt in range(3):
+                try:
+                    nationality = page.select("span.YhemCb")[1].text
+                    print(f"Nationality: {nationality}")
+                    break
+                except IndexError:
+                    nationality = driver.find_element(By.CSS_SELECTOR, "div.zloOqf span.YhemCb:nth-child(2)").text
+                    print(f"Nationality: {nationality}")
+                    break
+                except NoSuchElementException:
+                    print("No such element")
+                    nationality = "Nil"
+                except Exception as e:
+                    print(f"Attempt {attempt+1} failed: {e}")
+                    if attempt < 2:
+                        sleep(3)
 
             # restaurant telephone number
-            try:
-                telephone_number = page.select("span.LrzXr a span")[0].text
-                print(f"Telephone Number: {telephone_number}")
-            except IndexError:
-                telephone_number = driver.find_element(By.XPATH, "//a/span[starts-with(text(), '+')]").text
-                print(f"Telephone Number: {telephone_number}")
-            except NoSuchElementException as e:
-                print(e)
-                telephone_number = "Nil"
-                print(telephone_number)
+            for attempt in range(3):
+                try:
+                    telephone_number = page.select("span.LrzXr a span")[0].text
+                    print(f"Telephone Number: {telephone_number}")
+                    break
+                except IndexError:
+                    telephone_number = driver.find_element(By.XPATH, "//a/span[starts-with(text(), '+')]").text
+                    print(f"Telephone Number: {telephone_number}")
+                    break
+                except NoSuchElementException:
+                    print("Error: No nosuch element")
+                    telephone_number = "Nil"
+                    print(telephone_number)
+                except Exception as e:
+                    print(f"Attempt {attempt+1} failed: {e}")
+                    if attempt < 2:
+                        sleep(3)
 
             # restaurant website url
-            try:
-                website_url = driver.find_element(By.CSS_SELECTOR, "a.mI8Pwc").get_attribute("href")
-                print(f"Website: {website_url}")
-            except NoSuchElementException as e:
-                print(e)
-                website_url = "Nil"
+            for attempt in range(3):
+                try:
+                    website_url = driver.find_element(By.CSS_SELECTOR, "a.mI8Pwc").get_attribute("href")
+                    print(f"Website: {website_url}")
+                    break
+                except NoSuchElementException:
+                    print("Error: No such element")
+                    website_url = "Nil"
+                except Exception as e:
+                    print(f"Attempt {attempt+1} failed: {e}")
+                    if attempt < 2:
+                        sleep(3)
 
             # restaurant instagram link
-            try:
-                # insta_link = driver.find_element(By.CSS_SELECTOR, "g-link a").get_attribute("href")
-                insta_link = driver.find_element(By.XPATH, "//g-link/a[starts-with(@href, 'https://www.instagram.com/')]").get_attribute("href")
-                print(f"Instagram Link: {insta_link}")
-            except NoSuchElementException:
-                insta_link = page.select("g-link a")[0]["href"]
-                print(f"Instagram Link: {insta_link}")
-            except IndexError as e:
-                print(e)
-                insta_link = "Nil"
+            for attempt in range(3):
+                try:
+                    insta_link_element = driver.find_element(By.XPATH, "//g-link/a[starts-with(@href, 'https://www.instagram.com/')]")
+                    insta_link = insta_link_element.get_attribute("href")
+                    print(f"Instagram Link: {insta_link}")
+                    break
+                except NoSuchElementException:
+                    insta_link = page.select_one("g-link a[href^='https://www.instagram.com/']")["href"]
+                    print(f"Instagram Link: {insta_link}")
+                    break
+                except Exception as e:
+                    print(f"Attempt {attempt+1} to get IG link failed: {e}")
+                    insta_link = "Nil"
+                    if attempt < 2:
+                        sleep(3)
 
             # restaurant facebook link
-            try:
-                facebook_link = driver.find_element(By.XPATH, "//g-link/a[starts-with(@href, 'https://www.facebook.com/')]").get_attribute("href")
-                # facebook = driver.find_element(By.CSS_SELECTOR, "g-link a").get_attribute("href")
-                print(f"Facebool Link: {facebook_link}")
-            except NoSuchElementException:
-                facebook_link = page.select("g-link a")[1]["href"]
-                print(f"Facebool Link: {facebook_link}")
-            except IndexError as e:
-                facebook_link = "Nil"
-                print(e)
+            for attempt in range(3):
+                try:
+                    facebook_link_element = driver.find_element(By.XPATH, "//g-link/a[starts-with(@href, 'https://www.facebook.com/')]")
+                    facebook_link = facebook_link_element.get_attribute("href")
+                    print(f"Facebook Link: {facebook_link}")
+                    break
+                except NoSuchElementException:
+                    facebook_link = page.select("g-link a[href^='https://www.facebook.com/']")["href"]
+                    print(f"Facebook Link: {facebook_link}")
+                    break
+                except Exception as e:
+                    print(f"Attempt {attempt+1} to get FB link failed: {e}")
+                    facebook_link = "Nil"
+                    if attempt < 2:
+                        sleep(3)
 
             # restaurant service options
             try:
@@ -172,6 +200,7 @@ def scrapePage(url):
 
     driver.quit()
     return gastronomy_data
+
 # scrapePage(mainz)
 
 def gastronomy_data_csv():
