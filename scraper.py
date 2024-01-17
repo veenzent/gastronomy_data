@@ -5,7 +5,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import NoSuchElementException, WebDriverException
+from selenium.common.exceptions import NoSuchElementException
 
 chrome_options = Options()
 chrome_options.add_argument("--headless=new")
@@ -63,32 +63,36 @@ class Extractor(RestaurantScraper):
             # parse restaurant page to bs4
             page = soup(self.driver.page_source, "html.parser")
             return page
-
+    # extract restaurant's name
     def extract_restaurant_name(self):
         name = self.driver.find_element(By.XPATH, "//h2/span[not(@*)]").text
         print(f"Name: {name}")
         return name
-    
+
+    # extract restaurant's address
     def extract_restaurant_address(self):
         address = self.driver.find_element(By.CSS_SELECTOR, "span.LrzXr").text
         print(f"Address: {address}")
         return address
     
+    # extract restaurant's nationality
     def extract_restaurant_nationality(self):
         try:
-            nationality = self.driver.find_element(By.CSS_SELECTOR, "div.zloOqf span.YhemCb:nth-child(2)").text
-        except NoSuchElementException:
             nationality = driver.find_element(By.CSS_SELECTOR, "div.zloOqf span.YhemCb").text
+        except NoSuchElementException:
+            nationality = self.driver.find_element(By.CSS_SELECTOR, "div.zloOqf span.YhemCb:nth-child(2)").text
         except Exception as e:
             nationality = "Nil"
         print(f"Nationality: {nationality}")
         return nationality
 
+    # extract restaurant's telephone number
     def extract_restaurant_telephone_number(self):
         telephone_number = self.driver.find_element(By.XPATH, "//a/span[starts-with(text(), '+')]").text
         print(f"Telephone Number: {telephone_number}")
         return telephone_number
 
+    # extract restaurant's website
     def extract_restaurant_website(self):
         # website_url = self.driver.find_element(By.CSS_SELECTOR, "a.mI8Pwc").get_attribute("href")
         website_url = self.driver.find_element(By.XPATH, "//div[@ssk='1#0']/a[@class='mI8Pwc']").get_attribute("href")
@@ -112,6 +116,7 @@ class Extractor(RestaurantScraper):
             insta_link = "Nil"
         return insta_link
 
+    # extract restaurant's instagram link
     def extract_restaurant_instagram_link(self):
         insta_link = self.__instagram_link_1()
         if insta_link == "Nil":
@@ -133,7 +138,9 @@ class Extractor(RestaurantScraper):
             facebook_link = facebook_link_element.get_attribute("href")
         except NoSuchElementException:
             Facebook_link = "Nil"
+        return facebook_link
 
+    # extract restaurant's facebook link
     def extract_restaurant_facebook_link(self):
         facebook_link = self.__facebook_link_1()
         if facebook_link == "Nil":
@@ -141,6 +148,7 @@ class Extractor(RestaurantScraper):
         print(f"Facebook Link: {facebook_link}")
         return facebook_link
 
+    # extract restaurant's service options
     def extract_restaurant_service_options(self):
         try:
             service_options = self.driver.find_element(By.XPATH, "//div[@style='margin:8px 16px']").text
@@ -150,7 +158,8 @@ class Extractor(RestaurantScraper):
         print(f"service options: {service_options}")
         return service_options
     
-    def close_restaurant_page(self):
+    # close current restaurant's page
+    def close_curr_page(self):
         self.driver.back()
         self.wait.until(
             EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a.vwVdIc")))
@@ -158,9 +167,14 @@ class Extractor(RestaurantScraper):
 
 
 extractor = Extractor()
-mainz = "https://www.google.com/search?client=firefox-b-d&sca_esv=596374102&tbs=lf:1,lf_ui:9&tbm=lcl&sxsrf=ACQVn0-2G5sPef-vv6QYCfU0u1cJpeTLYw:1704641224806&q=mainz+finthen+restaurant&rflfq=1&num=10&sa=X&ved=2ahUKEwil77G1y8uDAxUvaUEAHT3CDdgQjGp6BAgSEAE&biw=1525&bih=760&dpr=0.9#rlfi=hd:;si:;mv:[[49.997862299999994,8.1819598],[49.9712104,8.1506037]];tbs:lrf:!1m4!1u3!2m2!3m1!1e1!1m4!1u5!2m2!5m1!1sgcid_3pizza_1restaurant!1m4!1u5!2m2!5m1!1sgcid_3german_1restaurant!1m4!1u2!2m2!2m1!1e1!2m1!1e2!2m1!1e5!2m1!1e3!3sIAEqAkRF,lf:1,lf_ui:9"
-extractor.load_url_page(mainz)
+
+# mainz = "https://www.google.com/search?client=firefox-b-d&sca_esv=596374102&tbs=lf:1,lf_ui:9&tbm=lcl&sxsrf=ACQVn0-2G5sPef-vv6QYCfU0u1cJpeTLYw:1704641224806&q=mainz+finthen+restaurant&rflfq=1&num=10&sa=X&ved=2ahUKEwil77G1y8uDAxUvaUEAHT3CDdgQjGp6BAgSEAE&biw=1525&bih=760&dpr=0.9#rlfi=hd:;si:;mv:[[49.997862299999994,8.1819598],[49.9712104,8.1506037]];tbs:lrf:!1m4!1u3!2m2!3m1!1e1!1m4!1u5!2m2!5m1!1sgcid_3pizza_1restaurant!1m4!1u5!2m2!5m1!1sgcid_3german_1restaurant!1m4!1u2!2m2!2m1!1e1!2m1!1e2!2m1!1e5!2m1!1e3!3sIAEqAkRF,lf:1,lf_ui:9"
+urll = "https://www.google.com/search?client=firefox-b-d&sca_esv=594603375&tbs=lrf:!1m4!1u3!2m2!3m1!1e1!1m4!1u5!2m2!5m1!1sgcid_3german_1restaurant!1m4!1u5!2m2!5m1!1sgcid_3indian_1restaurant!1m4!1u2!2m2!2m1!1e1!1m4!1u1!2m2!1m1!1e1!1m4!1u1!2m2!1m1!1e2!2m1!1e2!2m1!1e5!2m1!1e1!2m1!1e3!3sIAEqAkRF,lf:1,lf_ui:9&tbm=lcl&sxsrf=AM9HkKnqdXFj_FVNzgEjVYXigqgBUOtXnw:1703948168668&q=restaurants%20in%20germany&rflfq=1&num=10&sa=X&ved=2ahUKEwinmbzKtbeDAxWfS0EAHQLRDoEQjGp6BAgXEAE&biw=1525&bih=760&dpr=0.9&rlst=f#rlfi=hd:;si:;mv:[[52.809863099999994,14.150356],[47.8622162,6.5175032]];tbs:lrf:!1m4!1u3!2m2!3m1!1e1!1m4!1u5!2m2!5m1!1sgcid_3german_1restaurant!1m4!1u5!2m2!5m1!1sgcid_3indian_1restaurant!1m4!1u2!2m2!2m1!1e1!1m4!1u1!2m2!1m1!1e1!1m4!1u1!2m2!1m1!1e2!2m1!1e2!2m1!1e5!2m1!1e1!2m1!1e3!3sIAEqAkRF,lf:1,lf_ui:9"
+extractor.load_url_page(urll)
+
+gastronomy_data = []
 index = 1
+
 while extractor.click_restaurant():
     data = {
         # "S/N": extractor.restaurant_index,
@@ -177,5 +191,13 @@ while extractor.click_restaurant():
 
     print()
     print(data)
-    extractor.close_restaurant_page
+    extractor.close_curr_page
     index += 1
+
+
+def gastronomy_data_csv():
+    header = ["S/N", "Name", "Address", "Nationality", "Telephone_Number", "Website", "Instagram_link", "Facebook_link", "Service_options"]
+    yield ",".join(header) + "\n"
+
+    for values in gastronomy_data:
+        yield ",".join(values[key] for key in header) + "\n"

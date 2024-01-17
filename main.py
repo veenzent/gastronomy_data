@@ -1,35 +1,14 @@
-from time import sleep
+from .scraper import gastronomy_data_csv
+from .scraper import Extractor as extractor
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
-from selenium import webdriver
-from bs4 import BeautifulSoup as soup
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import NoSuchElementException, WebDriverException
 
 
 app = FastAPI(title="G-Maps Gastronomy Data")
-
-chrome_options = Options()
-chrome_options.add_argument("--headless=new")
-chrome_options.add_argument("--no-sandbox")
-chrome_options.add_argument("--disable-dev-shm-usage")
-# chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-# chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
-# chrome_options.add_experimental_option("useAutomationExtension", False)
-
-# instantiate browser driver
-driver = webdriver.Chrome(options=chrome_options)
-# driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
-
+gastronomy_data = []
 
 # urll = "https://www.google.com/search?client=firefox-b-d&sca_esv=594603375&tbs=lrf:!1m4!1u3!2m2!3m1!1e1!1m4!1u5!2m2!5m1!1sgcid_3german_1restaurant!1m4!1u5!2m2!5m1!1sgcid_3indian_1restaurant!1m4!1u2!2m2!2m1!1e1!1m4!1u1!2m2!1m1!1e1!1m4!1u1!2m2!1m1!1e2!2m1!1e2!2m1!1e5!2m1!1e1!2m1!1e3!3sIAEqAkRF,lf:1,lf_ui:9&tbm=lcl&sxsrf=AM9HkKnqdXFj_FVNzgEjVYXigqgBUOtXnw:1703948168668&q=restaurants%20in%20germany&rflfq=1&num=10&sa=X&ved=2ahUKEwinmbzKtbeDAxWfS0EAHQLRDoEQjGp6BAgXEAE&biw=1525&bih=760&dpr=0.9&rlst=f#rlfi=hd:;si:;mv:[[52.809863099999994,14.150356],[47.8622162,6.5175032]];tbs:lrf:!1m4!1u3!2m2!3m1!1e1!1m4!1u5!2m2!5m1!1sgcid_3german_1restaurant!1m4!1u5!2m2!5m1!1sgcid_3indian_1restaurant!1m4!1u2!2m2!2m1!1e1!1m4!1u1!2m2!1m1!1e1!1m4!1u1!2m2!1m1!1e2!2m1!1e2!2m1!1e5!2m1!1e1!2m1!1e3!3sIAEqAkRF,lf:1,lf_ui:9"
 # mainz = "https://www.google.com/search?client=firefox-b-d&sca_esv=596374102&tbs=lf:1,lf_ui:9&tbm=lcl&sxsrf=ACQVn0-2G5sPef-vv6QYCfU0u1cJpeTLYw:1704641224806&q=mainz+finthen+restaurant&rflfq=1&num=10&sa=X&ved=2ahUKEwil77G1y8uDAxUvaUEAHT3CDdgQjGp6BAgSEAE&biw=1525&bih=760&dpr=0.9#rlfi=hd:;si:;mv:[[49.997862299999994,8.1819598],[49.9712104,8.1506037]];tbs:lrf:!1m4!1u3!2m2!3m1!1e1!1m4!1u5!2m2!5m1!1sgcid_3pizza_1restaurant!1m4!1u5!2m2!5m1!1sgcid_3german_1restaurant!1m4!1u2!2m2!2m1!1e1!2m1!1e2!2m1!1e5!2m1!1e3!3sIAEqAkRF,lf:1,lf_ui:9"
-
-gastronomy_data = []
-
 
 @app.get("/")
 async def home():
@@ -48,218 +27,32 @@ async def home():
         9: "Append /docs to this page's url to continue"
     }
 
-@app.get("/data-via-page-url")
+@app.get("/data-via-url")
 async def scrape_page(url: str):
     if not url:
         raise HTTPException(status_code=404, detail="Input a url to scrape data")
 
-    wait = WebDriverWait(driver, 10)
-    try:
-        print("Fetching url...")
-        driver.get(url)
-        print("URL fetched")
-        sleep(5)
-    except Exception as e:
-        return {
-            "message": "Connectivity error, check your internet connection",
-            "Error": e
+    extractor.load_url_page(url)
+
+    index = 1
+    while extractor.click_restaurant():
+        data = {
+            # "S/N": extractor.restaurant_index,
+            "S/N": index,
+            "Name": extractor.extract_restaurant_name(),
+            "Address": extractor.extract_restaurant_address(),
+            "Nationality": extractor.extract_restaurant_nationality(),
+            "Telephone Number": extractor.extract_restaurant_telephone_number(),
+            "Website": extractor.extract_restaurant_website(),
+            "Instagram Link": extractor.extract_restaurant_instagram_link(),
+            "Facebook Link": extractor.extract_restaurant_facebook_link(),
+            "Service Options": extractor.extract_restaurant_service_options()
         }
-    
-    restaurants_links = None
-    for i in range(5):
-        sleep(2)
-        # retry mechanism to fetch restaurants links
-        for attempt in range(3):
-            try:
-                restaurants_links = wait.until(EC.presence_of_all_elements_located(locator=(By.CSS_SELECTOR, "a.vwVdIc")))
-                # driver.find_elements(By.CSS_SELECTOR, "a.vwVdIc")
-                # sleep(10)
-                print(f"Scraping {i+1} of {len(restaurants_links)} restaurants")
-                restaurant = restaurants_links[i]
-                break
-            except Exception as e:
-                print(f"Attempt {attempt+1} to get restaurants failed: {e}")
-                if attempt < 2:
-                    sleep(3)
-                else:
-                    return {
-                        "Error": e,
-                        "message": "Error fetching lists of resaurants from provided url",
-                        "fix": "Ensure you have a strong internet connection"
-                    }
 
-        # get restaurant's nationality before clicking restaurant
-        # to do
-        # nationality_parent_element = restaurant.find_element(By.CSS_SELECTOR, "div.rllt_details:nth-child(2)")
-        # nationality = nationality_parent_element.find_elements(By.XPATH, "./*")
-        # print(nationality[-1])
-        
-        # click and wait till the clicked restaurant page loads
-        restaurant.click()
-        wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, "div.kp-header")))
-
-        # parse popped-up page to beautiful soup
-        page = soup(driver.page_source, "html.parser")
-
-        try:
-            # restaurant name
-            try:
-                name =  page.select("h2 span")[0].text
-                print(f"Name: {name}")
-            except IndexError:
-                name = driver.find_element(By.XPATH, "//h2/span[not(@*)]").text
-                print(f"Name: {name}")
-            except NoSuchElementException as e:
-                print(e)
-                name = "Nil"
-
-            # restaurant address
-            try:
-                address = page.select("span.LrzXr")[0].text
-                print(f"Address: {address}")
-            except IndexError:
-                address = driver.find_element(By.CSS_SELECTOR, "span.LrzXr").text
-                print(f"Address: {address}")
-            except NoSuchElementException as e:
-                print("Element not found")
-                address = "Nil"
-
-            # restaurant nationality
-            try:
-                nationality = page.select("span.YhemCb")[1].text
-                print(f"Nationality: {nationality}")
-            except IndexError:
-                print("Index Error encountered...")
-                nationality = driver.find_element(By.CSS_SELECTOR, "div.zloOqf span.YhemCb:nth-child(2)").text
-                print(f"Nationality: {nationality}")
-            except NoSuchElementException:
-                print("First No such element encountered")
-                try:
-                    nationality = driver.find_element(By.CSS_SELECTOR, "div.zloOqf span.YhemCb").text
-                    print(f"Nationality: {nationality}")
-                except NoSuchElementException:
-                    print(f"Nationality of {name} is not provided on their page")
-                    nationality = "Nil"
-                    print(f"Nationality: {nationality}")
-            except Exception as e:
-                print(f"{name}'s nationality not found.\nError: {e}")
-                nationality = "Nil"
-                print(f"Nationality: {nationality}")
-
-            # restaurant telephone number
-            for attempt in range(3):
-                try:
-                    telephone_number = page.select("span.LrzXr a span")[0].text
-                    print(f"Telephone Number: {telephone_number}")
-                    break
-                except IndexError:
-                    telephone_number = driver.find_element(By.XPATH, "//a/span[starts-with(text(), '+')]").text
-                    print(f"Telephone Number: {telephone_number}")
-                    break
-                except NoSuchElementException:
-                    print("Error: No nosuch element")
-                    telephone_number = "Nil"
-                    print(telephone_number)
-                except Exception as e:
-                    print(f"Attempt {attempt+1} failed: {e}")
-                    if attempt < 2:
-                        sleep(3)
-
-            # restaurant website url
-            for attempt in range(3):
-                try:
-                    website_url = driver.find_element(By.CSS_SELECTOR, "a.mI8Pwc").get_attribute("href")
-                    print(f"Website: {website_url}")
-                    break
-                except NoSuchElementException:
-                    print("Error: No such element")
-                    website_url = "Nil"
-                except Exception as e:
-                    print(f"Attempt {attempt+1} failed: {e}")
-                    website_url = "Nil"
-                    if attempt < 2:
-                        sleep(3)
-
-            # restaurant instagram link
-            try:
-                insta_link_element = driver.find_element(By.XPATH, "//g-link/a[starts-with(@href, 'https://www.instagram.com/')]")
-                insta_link = insta_link_element.get_attribute("href")
-                print(f"Instagram Link: {insta_link}")
-            except NoSuchElementException:
-                insta_link = page.select_one("g-link a[href^='https://www.instagram.com/']")
-                if insta_link:
-                    insta_link = insta_link["href"]
-                    print(f"Instagram Link: {insta_link}")
-                else:
-                    insta_link = "Nil"
-                    print(f"No instagram link on {name}'s page")
-                    print(f"Instagram Link: {insta_link}")
-            except Exception as e:
-                insta_link = "Nil"
-                print(f"Error finding instagram link: {e}")
-                print(f"Instagram Link: {insta_link}")
-
-            # restaurant facebook link
-            try:
-                facebook_link_element = driver.find_element(By.XPATH, "//g-link/a[starts-with(@href, 'https://www.facebook.com/')]")
-                facebook_link = facebook_link_element.get_attribute("href")
-                print(f"Facebook Link: {facebook_link}")
-            except NoSuchElementException:
-                facebook_link_element = page.select_one("g-link a[href^='https://www.facebook.com/']")
-                if facebook_link_element:
-                    facebook_link = facebook_link_element["href"]
-                    print(f"Facebook Link: {facebook_link}")
-                else:
-                    facebook_link = "Nil"
-                    print(f"No facebook link on {name}'s page")
-                    print(f"Facebook Link: {facebook_link}")
-            except Exception as e:
-                facebook_link = "Nil"
-                print(f"Error finding facebook link: {e}")
-                print(f"Facebook Link: {facebook_link}")
-
-            # restaurant service options
-            try:
-                service_options = driver.find_element(By.XPATH, "//div[@style='margin:8px 16px']").text
-                service_options = service_options.split(":")[1].strip()
-                print(f"service options: {service_options}")
-            except NoSuchElementException:
-                service_options = page.find("div", {"style": "margin:8px 16px", "data-ved": "2ahUKEwjY1ICtsMmDAxWY3gIHHQ0MD7IQ8_cGegQIIBAA", "data-hveid": "CCAQAA"}).get_text(strip=True)
-                print(f"service options: {service_options}")
-            except IndexError as e:
-                service_options = "Nil"
-                print(e)
-
-            data = {
-                "S/N": str(f"{i+1}"),
-                "Name": name,
-                "Address": address,
-                "Nationality": nationality,
-                "Telephone_Number": telephone_number,
-                "Website_url": website_url,
-                "Instagram_link": insta_link,
-                "Facebook_link": facebook_link,
-                "Service_options": service_options
-            }
-            gastronomy_data.append(data)
-            print(data)
-            print(f"Done with {i+1}. {name} \n")
-
-            # go back to url main page
-            driver.back()
-            sleep(5)
-        except Exception as e:
-            print(f"Exception Error: {e}")
-        
-    driver.quit()
-    return gastronomy_data
-
-def gastronomy_data_csv():
-    header = ["S/N", "Name", "Address", "Nationality", "Telephone_Number", "Website_url", "Instagram_link", "Facebook_link", "Service_options"]
-    yield ",".join(header) + "\n"
-
-    for values in gastronomy_data:
-        yield ",".join(values[key] for key in header) + "\n"
+        gastronomy_data.append({index: data})
+        print(data)
+        index += 1
+        extractor.close_curr_page
 
 @app.get("/download")
 async def download_data():
