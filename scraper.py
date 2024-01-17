@@ -75,7 +75,12 @@ class Extractor(RestaurantScraper):
         return address
     
     def extract_restaurant_nationality(self):
-        nationality = self.driver.find_element(By.CSS_SELECTOR, "div.zloOqf span.YhemCb:nth-child(2)").text
+        try:
+            nationality = self.driver.find_element(By.CSS_SELECTOR, "div.zloOqf span.YhemCb:nth-child(2)").text
+        except NoSuchElementException:
+            nationality = driver.find_element(By.CSS_SELECTOR, "div.zloOqf span.YhemCb").text
+        except Exception as e:
+            nationality = "Nil"
         print(f"Nationality: {nationality}")
         return nationality
 
@@ -85,25 +90,63 @@ class Extractor(RestaurantScraper):
         return telephone_number
 
     def extract_restaurant_website(self):
-        website_url = self.driver.find_element(By.CSS_SELECTOR, "a.mI8Pwc").get_attribute("href")
+        # website_url = self.driver.find_element(By.CSS_SELECTOR, "a.mI8Pwc").get_attribute("href")
+        website_url = self.driver.find_element(By.XPATH, "//div[@ssk='1#0']/a[@class='mI8Pwc']").get_attribute("href")
         print(f"Website: {website_url}")
         return website_url
 
+    def __instagram_link_1(self):
+        # instagram link from web results
+        try:
+            insta_link_element = self.driver.find_element(By.XPATH, "//g-link/a[starts-with(@href, 'https://www.instagram.com/')]")
+            insta_link = insta_link_element.get_attribute("href")
+        except NoSuchElementException:
+            insta_link = "Nil"
+        return insta_link
+    
+    def __instagram_link_2(self):
+        try:
+            insta_link_element = self.driver.find_element(By.XPATH, "//div[@lass='zUuIvd']/a[starts-with(@href), 'https://www.instagram.com/']")
+            insta_link = insta_link_element.get_attribute("href")
+        except NoSuchElementException:
+            insta_link = "Nil"
+        return insta_link
+
     def extract_restaurant_instagram_link(self):
-        insta_link_element = self.driver.find_element(By.XPATH, "//g-link/a[starts-with(@href, 'https://www.instagram.com/')]")
-        insta_link = insta_link_element.get_attribute("href")
+        insta_link = self.__instagram_link_1()
+        if insta_link == "Nil":
+            insta_link = self.__instagram_link_2()
         print(f"Instagram Link: {insta_link}")
         return insta_link
 
+    def __facebook_link_1(self):
+        try:
+            facebook_link_element = self.driver.find_element(By.XPATH, "//g-link/a[starts-with(@href, 'https://www.facebook.com/')]")
+            facebook_link = facebook_link_element.get_attribute("href")
+        except NoSuchElementException:
+            facebook_link = "Nil"
+        return facebook_link
+
+    def __facebook_link_2(self):
+        try:
+            facebook_link_element = self.driver.find_element(By.XPATH, "//div[@lass='zUuIvd']/a[starts-with(@href), 'https://m.facebook.com/']")
+            facebook_link = facebook_link_element.get_attribute("href")
+        except NoSuchElementException:
+            Facebook_link = "Nil"
+
     def extract_restaurant_facebook_link(self):
-        facebook_link_element = self.driver.find_element(By.XPATH, "//g-link/a[starts-with(@href, 'https://www.facebook.com/')]")
-        facebook_link = facebook_link_element.get_attribute("href")
+        facebook_link = self.__facebook_link_1()
+        if facebook_link == "Nil":
+            facebook_link = self.__facebook_link_2()
         print(f"Facebook Link: {facebook_link}")
         return facebook_link
 
     def extract_restaurant_service_options(self):
-        service_options = self.driver.find_element(By.XPATH, "//div[@style='margin:8px 16px']").text
-        service_options = service_options.split(":")[1].strip()
+        try:
+            service_options = self.driver.find_element(By.XPATH, "//div[@style='margin:8px 16px']").text
+            service_options = service_options.split(":")[1].strip()
+        except NoSuchElementException:
+            service_options = "Nil"
         print(f"service options: {service_options}")
         return service_options
     
@@ -117,9 +160,11 @@ class Extractor(RestaurantScraper):
 extractor = Extractor()
 mainz = "https://www.google.com/search?client=firefox-b-d&sca_esv=596374102&tbs=lf:1,lf_ui:9&tbm=lcl&sxsrf=ACQVn0-2G5sPef-vv6QYCfU0u1cJpeTLYw:1704641224806&q=mainz+finthen+restaurant&rflfq=1&num=10&sa=X&ved=2ahUKEwil77G1y8uDAxUvaUEAHT3CDdgQjGp6BAgSEAE&biw=1525&bih=760&dpr=0.9#rlfi=hd:;si:;mv:[[49.997862299999994,8.1819598],[49.9712104,8.1506037]];tbs:lrf:!1m4!1u3!2m2!3m1!1e1!1m4!1u5!2m2!5m1!1sgcid_3pizza_1restaurant!1m4!1u5!2m2!5m1!1sgcid_3german_1restaurant!1m4!1u2!2m2!2m1!1e1!2m1!1e2!2m1!1e5!2m1!1e3!3sIAEqAkRF,lf:1,lf_ui:9"
 extractor.load_url_page(mainz)
+index = 1
 while extractor.click_restaurant():
     data = {
-        "S/N": extractor.restaurant_index,
+        # "S/N": extractor.restaurant_index,
+        "S/N": index,
         "Name": extractor.extract_restaurant_name(),
         "Address": extractor.extract_restaurant_address(),
         "Nationality": extractor.extract_restaurant_nationality(),
@@ -133,3 +178,4 @@ while extractor.click_restaurant():
     print()
     print(data)
     extractor.close_restaurant_page
+    index += 1
