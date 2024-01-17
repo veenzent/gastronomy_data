@@ -52,7 +52,8 @@ async def scrape_page(url: str):
         gastronomy_data.append({index: data})
         print(data)
         index += 1
-        extractor.close_curr_page
+        extractor.close_current_page()
+    extractor.quit_browser()
 
 @app.get("/download")
 async def download_data():

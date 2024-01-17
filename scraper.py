@@ -46,7 +46,9 @@ class RestaurantScraper:
             curr_restaurant = restaurants[self.restaurant_index]
             self.restaurant_index += 1
             return curr_restaurant
-
+    
+    def quit_browser(self):
+        self.driver.quit()
 
 class Extractor(RestaurantScraper):
     def __init__(self):
@@ -159,7 +161,7 @@ class Extractor(RestaurantScraper):
         return service_options
     
     # close current restaurant's page
-    def close_curr_page(self):
+    def close_current_page(self):
         self.driver.back()
         self.wait.until(
             EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a.vwVdIc")))
@@ -191,7 +193,7 @@ while extractor.click_restaurant():
 
     print()
     print(data)
-    extractor.close_curr_page
+    extractor.close_current_page
     index += 1
 
 
