@@ -104,7 +104,7 @@ async def scrape_page(url: str):
         try:
             # restaurant name
             try:
-                name =  page.select("h2.qrShPb span")[0].text
+                name =  page.select("h2 span")[0].text
                 print(f"Name: {name}")
             except IndexError:
                 name = driver.find_element(By.XPATH, "//h2/span[not(@*)]").text
