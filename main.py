@@ -1,10 +1,10 @@
-from .scraper import gastronomy_data_csv
-from .scraper import Extractor as extractor
+from scraper import Extractor
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
 
 
 app = FastAPI(title="G-Maps Gastronomy Data")
+extractor = Extractor()
 gastronomy_data = []
 
 # urll = "https://www.google.com/search?client=firefox-b-d&sca_esv=594603375&tbs=lrf:!1m4!1u3!2m2!3m1!1e1!1m4!1u5!2m2!5m1!1sgcid_3german_1restaurant!1m4!1u5!2m2!5m1!1sgcid_3indian_1restaurant!1m4!1u2!2m2!2m1!1e1!1m4!1u1!2m2!1m1!1e1!1m4!1u1!2m2!1m1!1e2!2m1!1e2!2m1!1e5!2m1!1e1!2m1!1e3!3sIAEqAkRF,lf:1,lf_ui:9&tbm=lcl&sxsrf=AM9HkKnqdXFj_FVNzgEjVYXigqgBUOtXnw:1703948168668&q=restaurants%20in%20germany&rflfq=1&num=10&sa=X&ved=2ahUKEwinmbzKtbeDAxWfS0EAHQLRDoEQjGp6BAgXEAE&biw=1525&bih=760&dpr=0.9&rlst=f#rlfi=hd:;si:;mv:[[52.809863099999994,14.150356],[47.8622162,6.5175032]];tbs:lrf:!1m4!1u3!2m2!3m1!1e1!1m4!1u5!2m2!5m1!1sgcid_3german_1restaurant!1m4!1u5!2m2!5m1!1sgcid_3indian_1restaurant!1m4!1u2!2m2!2m1!1e1!1m4!1u1!2m2!1m1!1e1!1m4!1u1!2m2!1m1!1e2!2m1!1e2!2m1!1e5!2m1!1e1!2m1!1e3!3sIAEqAkRF,lf:1,lf_ui:9"
@@ -54,6 +54,13 @@ async def scrape_page(url: str):
         index += 1
         extractor.close_current_page()
     extractor.quit_browser()
+
+def gastronomy_data_csv():
+    header = ["S/N", "Name", "Address", "Nationality", "Telephone_Number", "Website", "Instagram_link", "Facebook_link", "Service_options"]
+    yield ",".join(header) + "\n"
+
+    for values in gastronomy_data:
+        yield ",".join(values[key] for key in header) + "\n"
 
 @app.get("/download")
 async def download_data():

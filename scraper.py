@@ -39,8 +39,8 @@ class RestaurantScraper:
     def scrape_restaurants(self):
         restaurants = self.wait.until(
             EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a.vwVdIc")))
-        sleep(2)
-        print(f"{len(restaurants)} restaurants found")
+        sleep(3)
+        print(f"{len(restaurants)} restaurants found \n")
 
         if self.restaurant_index < len(restaurants):
             curr_restaurant = restaurants[self.restaurant_index]
@@ -96,8 +96,10 @@ class Extractor(RestaurantScraper):
 
     # extract restaurant's website
     def extract_restaurant_website(self):
-        # website_url = self.driver.find_element(By.CSS_SELECTOR, "a.mI8Pwc").get_attribute("href")
-        website_url = self.driver.find_element(By.XPATH, "//div[@ssk='1#0']/a[@class='mI8Pwc']").get_attribute("href")
+        try:
+            website_url = self.driver.find_element(By.XPATH, "//div[@ssk='1#0']/a[@class='mI8Pwc']").get_attribute("href")
+        except NoSuchElementException:
+            website_url = "Nil"
         print(f"Website: {website_url}")
         return website_url
 
@@ -112,7 +114,7 @@ class Extractor(RestaurantScraper):
     
     def __instagram_link_2(self):
         try:
-            insta_link_element = self.driver.find_element(By.XPATH, "//div[@lass='zUuIvd']/a[starts-with(@href), 'https://www.instagram.com/']")
+            insta_link_element = self.driver.find_element(By.XPATH, "//div[@lass='zUuIvd']/a[starts-with(@href, 'https://www.instagram.com/')]")
             insta_link = insta_link_element.get_attribute("href")
         except NoSuchElementException:
             insta_link = "Nil"
@@ -136,10 +138,10 @@ class Extractor(RestaurantScraper):
 
     def __facebook_link_2(self):
         try:
-            facebook_link_element = self.driver.find_element(By.XPATH, "//div[@lass='zUuIvd']/a[starts-with(@href), 'https://m.facebook.com/']")
+            facebook_link_element = self.driver.find_element(By.XPATH, "//div[@lass='zUuIvd']/a[starts-with(@href, 'https://m.facebook.com/')]")
             facebook_link = facebook_link_element.get_attribute("href")
         except NoSuchElementException:
-            Facebook_link = "Nil"
+            facebook_link = "Nil"
         return facebook_link
 
     # extract restaurant's facebook link
@@ -165,41 +167,33 @@ class Extractor(RestaurantScraper):
         self.driver.back()
         self.wait.until(
             EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a.vwVdIc")))
-        sleep(2)
+        sleep(3)
 
 
-extractor = Extractor()
+# extractor = Extractor()
 
-# mainz = "https://www.google.com/search?client=firefox-b-d&sca_esv=596374102&tbs=lf:1,lf_ui:9&tbm=lcl&sxsrf=ACQVn0-2G5sPef-vv6QYCfU0u1cJpeTLYw:1704641224806&q=mainz+finthen+restaurant&rflfq=1&num=10&sa=X&ved=2ahUKEwil77G1y8uDAxUvaUEAHT3CDdgQjGp6BAgSEAE&biw=1525&bih=760&dpr=0.9#rlfi=hd:;si:;mv:[[49.997862299999994,8.1819598],[49.9712104,8.1506037]];tbs:lrf:!1m4!1u3!2m2!3m1!1e1!1m4!1u5!2m2!5m1!1sgcid_3pizza_1restaurant!1m4!1u5!2m2!5m1!1sgcid_3german_1restaurant!1m4!1u2!2m2!2m1!1e1!2m1!1e2!2m1!1e5!2m1!1e3!3sIAEqAkRF,lf:1,lf_ui:9"
-urll = "https://www.google.com/search?client=firefox-b-d&sca_esv=594603375&tbs=lrf:!1m4!1u3!2m2!3m1!1e1!1m4!1u5!2m2!5m1!1sgcid_3german_1restaurant!1m4!1u5!2m2!5m1!1sgcid_3indian_1restaurant!1m4!1u2!2m2!2m1!1e1!1m4!1u1!2m2!1m1!1e1!1m4!1u1!2m2!1m1!1e2!2m1!1e2!2m1!1e5!2m1!1e1!2m1!1e3!3sIAEqAkRF,lf:1,lf_ui:9&tbm=lcl&sxsrf=AM9HkKnqdXFj_FVNzgEjVYXigqgBUOtXnw:1703948168668&q=restaurants%20in%20germany&rflfq=1&num=10&sa=X&ved=2ahUKEwinmbzKtbeDAxWfS0EAHQLRDoEQjGp6BAgXEAE&biw=1525&bih=760&dpr=0.9&rlst=f#rlfi=hd:;si:;mv:[[52.809863099999994,14.150356],[47.8622162,6.5175032]];tbs:lrf:!1m4!1u3!2m2!3m1!1e1!1m4!1u5!2m2!5m1!1sgcid_3german_1restaurant!1m4!1u5!2m2!5m1!1sgcid_3indian_1restaurant!1m4!1u2!2m2!2m1!1e1!1m4!1u1!2m2!1m1!1e1!1m4!1u1!2m2!1m1!1e2!2m1!1e2!2m1!1e5!2m1!1e1!2m1!1e3!3sIAEqAkRF,lf:1,lf_ui:9"
-extractor.load_url_page(urll)
+# # mainz = "https://www.google.com/search?client=firefox-b-d&sca_esv=596374102&tbs=lf:1,lf_ui:9&tbm=lcl&sxsrf=ACQVn0-2G5sPef-vv6QYCfU0u1cJpeTLYw:1704641224806&q=mainz+finthen+restaurant&rflfq=1&num=10&sa=X&ved=2ahUKEwil77G1y8uDAxUvaUEAHT3CDdgQjGp6BAgSEAE&biw=1525&bih=760&dpr=0.9#rlfi=hd:;si:;mv:[[49.997862299999994,8.1819598],[49.9712104,8.1506037]];tbs:lrf:!1m4!1u3!2m2!3m1!1e1!1m4!1u5!2m2!5m1!1sgcid_3pizza_1restaurant!1m4!1u5!2m2!5m1!1sgcid_3german_1restaurant!1m4!1u2!2m2!2m1!1e1!2m1!1e2!2m1!1e5!2m1!1e3!3sIAEqAkRF,lf:1,lf_ui:9"
+# urll = "https://www.google.com/search?client=firefox-b-d&sca_esv=594603375&tbs=lrf:!1m4!1u3!2m2!3m1!1e1!1m4!1u5!2m2!5m1!1sgcid_3german_1restaurant!1m4!1u5!2m2!5m1!1sgcid_3indian_1restaurant!1m4!1u2!2m2!2m1!1e1!1m4!1u1!2m2!1m1!1e1!1m4!1u1!2m2!1m1!1e2!2m1!1e2!2m1!1e5!2m1!1e1!2m1!1e3!3sIAEqAkRF,lf:1,lf_ui:9&tbm=lcl&sxsrf=AM9HkKnqdXFj_FVNzgEjVYXigqgBUOtXnw:1703948168668&q=restaurants%20in%20germany&rflfq=1&num=10&sa=X&ved=2ahUKEwinmbzKtbeDAxWfS0EAHQLRDoEQjGp6BAgXEAE&biw=1525&bih=760&dpr=0.9&rlst=f#rlfi=hd:;si:;mv:[[52.809863099999994,14.150356],[47.8622162,6.5175032]];tbs:lrf:!1m4!1u3!2m2!3m1!1e1!1m4!1u5!2m2!5m1!1sgcid_3german_1restaurant!1m4!1u5!2m2!5m1!1sgcid_3indian_1restaurant!1m4!1u2!2m2!2m1!1e1!1m4!1u1!2m2!1m1!1e1!1m4!1u1!2m2!1m1!1e2!2m1!1e2!2m1!1e5!2m1!1e1!2m1!1e3!3sIAEqAkRF,lf:1,lf_ui:9"
+# extractor.load_url_page(urll)
 
-gastronomy_data = []
-index = 1
+# gastronomy_data = []
+# index = 1
 
-while extractor.click_restaurant():
-    data = {
-        # "S/N": extractor.restaurant_index,
-        "S/N": index,
-        "Name": extractor.extract_restaurant_name(),
-        "Address": extractor.extract_restaurant_address(),
-        "Nationality": extractor.extract_restaurant_nationality(),
-        "Telephone Number": extractor.extract_restaurant_telephone_number(),
-        "Website": extractor.extract_restaurant_website(),
-        "Instagram Link": extractor.extract_restaurant_instagram_link(),
-        "Facebook Link": extractor.extract_restaurant_facebook_link(),
-        "Service Options": extractor.extract_restaurant_service_options()
-    }
+# while extractor.click_restaurant():
+#     data = {
+#         # "S/N": extractor.restaurant_index,
+#         "S/N": index,
+#         "Name": extractor.extract_restaurant_name(),
+#         "Address": extractor.extract_restaurant_address(),
+#         "Nationality": extractor.extract_restaurant_nationality(),
+#         "Telephone Number": extractor.extract_restaurant_telephone_number(),
+#         "Website": extractor.extract_restaurant_website(),
+#         "Instagram Link": extractor.extract_restaurant_instagram_link(),
+#         "Facebook Link": extractor.extract_restaurant_facebook_link(),
+#         "Service Options": extractor.extract_restaurant_service_options()
+#     }
 
-    print()
-    print(data)
-    extractor.close_current_page
-    index += 1
+#     print('\n', data, '\n')
+#     extractor.close_current_page
+#     index += 1
 
-
-def gastronomy_data_csv():
-    header = ["S/N", "Name", "Address", "Nationality", "Telephone_Number", "Website", "Instagram_link", "Facebook_link", "Service_options"]
-    yield ",".join(header) + "\n"
-
-    for values in gastronomy_data:
-        yield ",".join(values[key] for key in header) + "\n"
