@@ -61,10 +61,8 @@ class Extractor(RestaurantScraper):
             self.wait.until(
                 EC.visibility_of_all_elements_located((By.CSS_SELECTOR, "div.kp-header")))
             sleep(3)
-            
-            # parse restaurant page to bs4
-            page = soup(self.driver.page_source, "html.parser")
-            return page
+            return True
+
     # extract restaurant's name
     def extract_restaurant_name(self):
         name = self.driver.find_element(By.XPATH, "//h2/span[not(@*)]").text
@@ -82,7 +80,10 @@ class Extractor(RestaurantScraper):
         try:
             nationality = driver.find_element(By.CSS_SELECTOR, "div.zloOqf span.YhemCb").text
         except NoSuchElementException:
-            nationality = self.driver.find_element(By.CSS_SELECTOR, "div.zloOqf span.YhemCb:nth-child(2)").text
+            # nationality = self.driver.find_element(By.CSS_SELECTOR, "div.zloOqf span.YhemCb:nth-child(2)").text
+            # parse restaurant page to bs4
+            page = soup(self.driver.page_source, "html.parser")
+            nationality = page.find("div.zloOqf span.YhemCb:nth-child(2)").text
         except Exception as e:
             nationality = "Nil"
         print(f"Nationality: {nationality}")
@@ -90,7 +91,10 @@ class Extractor(RestaurantScraper):
 
     # extract restaurant's telephone number
     def extract_restaurant_telephone_number(self):
-        telephone_number = self.driver.find_element(By.XPATH, "//a/span[starts-with(text(), '+')]").text
+        try:
+            telephone_number = self.driver.find_element(By.XPATH, "//a/span[starts-with(text(), '+')]").text
+        except NoSuchElementException:
+            telephone_number = "Nil"
         print(f"Telephone Number: {telephone_number}")
         return telephone_number
 
@@ -111,7 +115,7 @@ class Extractor(RestaurantScraper):
         except NoSuchElementException:
             insta_link = "Nil"
         return insta_link
-    
+
     def __instagram_link_2(self):
         try:
             insta_link_element = self.driver.find_element(By.XPATH, "//div[@lass='zUuIvd']/a[starts-with(@href, 'https://www.instagram.com/')]")
@@ -196,4 +200,3 @@ class Extractor(RestaurantScraper):
 #     print('\n', data, '\n')
 #     extractor.close_current_page
 #     index += 1
-
