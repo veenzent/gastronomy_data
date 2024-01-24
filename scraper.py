@@ -83,7 +83,11 @@ class Extractor(RestaurantScraper):
             # nationality = self.driver.find_element(By.CSS_SELECTOR, "div.zloOqf span.YhemCb:nth-child(2)").text
             # parse restaurant page to bs4
             page = soup(self.driver.page_source, "html.parser")
-            nationality = page.find("div.zloOqf span.YhemCb:nth-child(2)").text
+            nationality = page.find("div.zloOqf span.YhemCb:nth-child(2)")
+            if nationality:
+                nationality = nationality.text
+            else:
+                nationality = "Nil"
         except Exception as e:
             nationality = "Nil"
         print(f"Nationality: {nationality}")
