@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/style.css">
+    <title>scraping url</title>
+</head>
+<body>
+    <div class="container">
+        <h1 class="header">Gastronomy Data Result</h1>
+        <div class="result">
+            <table>
+                <thead>
+                    <tr>
+                        <th>S/N</th>
+                        <th>Name</th>
+                        <th>Address</th>
+                        <th>Nationality</th>
+                        <th>Telephone Number</th>
+                        <th>Website</th>
+                        <th>Instagram Link</th>
+                        <th>Facebook Link</th>
+                        <th>Service Options</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for data in gastronomy_data %}
+                    <tr>
+                        <td>{{data['S/N']}}</td>
+                        <td>{{data['Name']}}</td>
+                        <td>{{data['Address']}}</td>
+                        <td>{{data['Nationality']}}</td>
+                        <td>{{data['Telephone Number']}}</td>
+                        <td>{{data['Website']}}</td>
+                        <td>{{data['Instagram Link']}}</td>
+                        <td>{{data['Facebook Link']}}</td>
+                        <td>{{data['Service Options']}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
