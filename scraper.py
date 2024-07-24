@@ -6,6 +6,9 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service as ChromeService
+
 
 chrome_options = Options()
 chrome_options.add_argument("--headless=new")
@@ -15,14 +18,14 @@ chrome_options.add_argument("--disable-dev-shm-usage")
 # chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
 # chrome_options.add_experimental_option("useAutomationExtension", False)
 
-# instantiate browser driver
-driver = webdriver.Chrome(options=chrome_options)
+#Set up Chrome driver using WebDriver Manager
+# chromeDriver = webdriver.Chrome(ChromeDriverManager().install(), chrome_options)
 # driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
 
 class RestaurantScraper:
-    driver = webdriver.Chrome(options=chrome_options)
-    wait = WebDriverWait(driver, 10)
+    chromeDriver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=chrome_options)
+    wait = WebDriverWait(chromeDriver, 10)
 
     def __init__(self) -> None:
         self.restaurant_index = 0
@@ -32,7 +35,7 @@ class RestaurantScraper:
             raise ValueError("Input a url to scrape data")
 
         print("Fetching url...")
-        self.driver.get(url)
+        self.chromeDriver.get(url)
         sleep(2)
         print("URL fetched \n")
 
@@ -48,7 +51,7 @@ class RestaurantScraper:
             return curr_restaurant
     
     def quit_browser(self):
-        self.driver.quit()
+        self.chromeDriver.quit()
 
 class Extractor(RestaurantScraper):
     def __init__(self):
@@ -65,24 +68,24 @@ class Extractor(RestaurantScraper):
 
     # extract restaurant's name
     def extract_restaurant_name(self):
-        name = self.driver.find_element(By.XPATH, "//h2/span[not(@*)]").text
+        name = self.chromeDriver.find_element(By.XPATH, "//h2/span[not(@*)]").text
         print(f"Name: {name}")
         return name
 
     # extract restaurant's address
     def extract_restaurant_address(self):
-        address = self.driver.find_element(By.CSS_SELECTOR, "span.LrzXr").text
+        address = self.chromeDriver.find_element(By.CSS_SELECTOR, "span.LrzXr").text
         print(f"Address: {address}")
         return address
     
     # extract restaurant's nationality
     def extract_restaurant_nationality(self):
         try:
-            nationality = driver.find_element(By.CSS_SELECTOR, "div.zloOqf span.YhemCb").text
+            nationality = self.chromeDriver.find_element(By.CSS_SELECTOR, "div.zloOqf span.YhemCb").text
         except NoSuchElementException:
-            # nationality = self.driver.find_element(By.CSS_SELECTOR, "div.zloOqf span.YhemCb:nth-child(2)").text
+            # nationality = self.chromeDriver.find_element(By.CSS_SELECTOR, "div.zloOqf span.YhemCb:nth-child(2)").text
             # parse restaurant page to bs4
-            page = soup(self.driver.page_source, "html.parser")
+            page = soup(self.chromeDriver.page_source, "html.parser")
             nationality = page.find("div.zloOqf span.YhemCb:nth-child(2)")
             if nationality:
                 nationality = nationality.text
@@ -96,7 +99,7 @@ class Extractor(RestaurantScraper):
     # extract restaurant's telephone number
     def extract_restaurant_telephone_number(self):
         try:
-            telephone_number = self.driver.find_element(By.XPATH, "//a/span[starts-with(text(), '+')]").text
+            telephone_number = self.chromeDriver.find_element(By.XPATH, "//a/span[starts-with(text(), '+')]").text
         except NoSuchElementException:
             telephone_number = "Nil"
         print(f"Telephone Number: {telephone_number}")
@@ -105,7 +108,7 @@ class Extractor(RestaurantScraper):
     # extract restaurant's website
     def extract_restaurant_website(self):
         try:
-            website_url = self.driver.find_element(By.XPATH, "//div[@ssk='1#0']/a[@class='mI8Pwc']").get_attribute("href")
+            website_url = self.chromeDriver.find_element(By.XPATH, "//div[@ssk='1#0']/a[@class='mI8Pwc']").get_attribute("href")
         except NoSuchElementException:
             website_url = "Nil"
         print(f"Website: {website_url}")
@@ -114,7 +117,7 @@ class Extractor(RestaurantScraper):
     def __instagram_link_1(self):
         # instagram link from web results
         try:
-            insta_link_element = self.driver.find_element(By.XPATH, "//g-link/a[starts-with(@href, 'https://www.instagram.com/')]")
+            insta_link_element = self.chromeDriver.find_element(By.XPATH, "//g-link/a[starts-with(@href, 'https://www.instagram.com/')]")
             insta_link = insta_link_element.get_attribute("href")
         except NoSuchElementException:
             insta_link = "Nil"
@@ -122,7 +125,7 @@ class Extractor(RestaurantScraper):
 
     def __instagram_link_2(self):
         try:
-            insta_link_element = self.driver.find_element(By.XPATH, "//div[@lass='zUuIvd']/a[starts-with(@href, 'https://www.instagram.com/')]")
+            insta_link_element = self.chromeDriver.find_element(By.XPATH, "//div[@lass='zUuIvd']/a[starts-with(@href, 'https://www.instagram.com/')]")
             insta_link = insta_link_element.get_attribute("href")
         except NoSuchElementException:
             insta_link = "Nil"
@@ -138,7 +141,7 @@ class Extractor(RestaurantScraper):
 
     def __facebook_link_1(self):
         try:
-            facebook_link_element = self.driver.find_element(By.XPATH, "//g-link/a[starts-with(@href, 'https://www.facebook.com/')]")
+            facebook_link_element = self.chromeDriver.find_element(By.XPATH, "//g-link/a[starts-with(@href, 'https://www.facebook.com/')]")
             facebook_link = facebook_link_element.get_attribute("href")
         except NoSuchElementException:
             facebook_link = "Nil"
@@ -146,7 +149,7 @@ class Extractor(RestaurantScraper):
 
     def __facebook_link_2(self):
         try:
-            facebook_link_element = self.driver.find_element(By.XPATH, "//div[@lass='zUuIvd']/a[starts-with(@href, 'https://m.facebook.com/')]")
+            facebook_link_element = self.chromeDriver.find_element(By.XPATH, "//div[@lass='zUuIvd']/a[starts-with(@href, 'https://m.facebook.com/')]")
             facebook_link = facebook_link_element.get_attribute("href")
         except NoSuchElementException:
             facebook_link = "Nil"
@@ -163,7 +166,7 @@ class Extractor(RestaurantScraper):
     # extract restaurant's service options
     def extract_restaurant_service_options(self):
         try:
-            service_options = self.driver.find_element(By.XPATH, "//div[@style='margin:8px 16px']").text
+            service_options = self.chromeDriver.find_element(By.XPATH, "//div[@style='margin:8px 16px']").text
             service_options = service_options.split(":")[1].strip()
         except NoSuchElementException:
             service_options = "Nil"
@@ -172,7 +175,7 @@ class Extractor(RestaurantScraper):
     
     # close current restaurant's page
     def close_current_page(self):
-        self.driver.back()
+        self.chromeDriver.back()
         self.wait.until(
             EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a.vwVdIc")))
         sleep(3)
