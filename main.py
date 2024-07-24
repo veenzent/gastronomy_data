@@ -67,6 +67,10 @@ async def scrape_page(request: Request, url: str):
         index += 1
         extractor.close_current_page()
 
+        # limit scraping to 10 results(10 restaurants)
+        if index == 11:
+            break
+
     extractor.quit_browser()
     result = df.to_dict(orient="records")
     return templates.TemplateResponse("result.html", {"request": request, "gastronomy_data": result})
