@@ -76,4 +76,12 @@ def scrapeData(url: str):
 # create a form
 form = st.form(key="my_form")
 url = form.text_input("Enter URL")
-form.form_submit_button("Scrape", on_click=scrapeData, kwargs=url:url)
+
+def scrapeCaller():
+    if url:
+        scrapeData(url)
+    else:
+        st.write("Insert a url to scrape")
+
+form.form_submit_button("Scrape", on_click=scrapeCaller)
+
