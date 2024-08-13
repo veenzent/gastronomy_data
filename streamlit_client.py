@@ -57,17 +57,21 @@ def scrapeData(url: str):
             "Service Options": extractor.extract_restaurant_service_options()
         }
 
+        # update dataframe: append new row
         new_row = pd.Series(data)
         df.loc[len(df)] = new_row
+
+        # display new row
+        st.table(pd.DataFrame(data), index=[0])
+
         print(data, '\n')
         index += 1
         extractor.close_current_page()
 
-        # display dataframe
-        st.dataframe(df)
-
         # limit scraping to 10 results(10 restaurants)
         if index == 11:
+            # display dataframe
+            st.dataframe(df)
             break
 
     extractor.quit_browser()
@@ -77,11 +81,11 @@ def scrapeData(url: str):
 form = st.form(key="my_form")
 url = form.text_input("Enter URL")
 
-def scrapeCaller():
+def scrapeCaller(url):
     if url:
         scrapeData(url)
     else:
         st.write("Insert a url to scrape")
 
-form.form_submit_button("Scrape", on_click=scrapeCaller)
+form.form_submit_button("Scrape", on_click=scrapeCaller, args=[url])
 
