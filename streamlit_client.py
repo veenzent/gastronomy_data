@@ -22,6 +22,8 @@ st.markdown("""
     """, unsafe_allow_html=True
 )
 
+# create an instance of Extractor
+extrator = Extractor()
 
 def scrapeData(url: str):
     # create a dataframe
