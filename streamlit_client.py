@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
-from scraper import extractor
+from scraper import Extractor
+from selenium.common.exceptions import WebDriverException
 
 
 st.markdown('<h1 style="color: lightblue; text-align: center;">GASTRONOMY DATA</h1>', unsafe_allow_html=True)
@@ -38,7 +39,11 @@ def scrapeData(url: str):
     df = pd.DataFrame(df_data)
 
     # load url
-    extractor.load_url_page(url)
+    try:
+        extractor.load_url_page(url)
+    except WebDriverException as e:
+        st.toast('Please check your network connection for internet access')
+        extractor.retry(extractor.load_url_page, args=(url))
 
     index = 1
     while extractor.click_restaurant():

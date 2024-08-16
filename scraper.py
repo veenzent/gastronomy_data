@@ -38,19 +38,19 @@ class RestaurantScraper:
 
         print("Fetching url...")
         self.chromeDriver.get(url)
-        try:
-            # check if cookie consent pops up then accept it
-            self.chromeDriver.switch_to.frame(self.chromeDriver.find_element(By.XPATH, self.cookie_consent_xpath)) 
-            sleep(5) 
-            self.chromeDriver.find_element(By.XPATH, self.cookie_consent_xpath).click()
-        except NoSuchElementException:
-            print("No cookie consent found")
-        except ElementNotInteractableException:
-            print("Element not interactable")
-        finally:
-            pass
         sleep(2)
         print("URL fetched \n")
+
+    def retry(self, func, args, kwargs):
+        attempts = kwargs.get('attempts', 3)
+        delay = kwargs.get('delay', 2)
+        for attempt in range(attempts):
+            try:
+                return func(*args)
+            except Exception as e:
+                if attempt == attempts - 1:
+                    raise e
+                sleep(delay)
 
     def scrape_restaurants(self):
         print("Scraping restaurants...")
