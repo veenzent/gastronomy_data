@@ -5,13 +5,13 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, ElementNotInteractableException
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service as ChromeService
 
 
 chrome_options = Options()
-chrome_options.add_argument("--headless=new")
+# chrome_options.add_argument("--headless=new")
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-dev-shm-usage")
 # chrome_options.add_argument("--disable-blink-features=AutomationControlled")
@@ -28,6 +28,7 @@ class RestaurantScraper:
     service = ChromeService(executable_path="./chromedriver.exe")
     chromeDriver = webdriver.Chrome(service=service, options=chrome_options)
     wait = WebDriverWait(chromeDriver, 10)
+    cookie_consent_xpath = '//*[@id="yDmH0d"]/c-wiz/div/div/div/div[2]/div[1]/div[3]/div[1]/div[2]/form[1]'
 
     def __init__(self) -> None:
         self.restaurant_index = 0
@@ -38,10 +39,22 @@ class RestaurantScraper:
 
         print("Fetching url...")
         self.chromeDriver.get(url)
+        try:
+            # check if cookie consent pops up then accept it
+            self.chromeDriver.switch_to.frame(self.chromeDriver.find_element(By.XPATH, self.cookie_consent_xpath)) 
+            sleep(5) 
+            self.chromeDriver.find_element(By.XPATH, self.cookie_consent_xpath).click()
+        except NoSuchElementException:
+            print("No cookie consent found")
+        except ElementNotInteractableException:
+            print("Element not interactable")
+        finally:
+            pass
         sleep(2)
         print("URL fetched \n")
 
     def scrape_restaurants(self):
+        print("Scraping restaurants...")
         restaurants = self.wait.until(
             EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a.vwVdIc")))
         sleep(3)

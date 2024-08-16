@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from scraper import Extractor
+from scraper import extractor
 
 
 st.markdown('<h1 style="color: lightblue; text-align: center;">GASTRONOMY DATA</h1>', unsafe_allow_html=True)
@@ -21,9 +21,6 @@ st.markdown("""
     """, unsafe_allow_html=True
 )
 
-
-# create an instace of Exctractor
-extractor = Extractor()
 
 def scrapeData(url: str):
     # create a dataframe
