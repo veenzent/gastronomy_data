@@ -23,7 +23,7 @@ st.markdown("""
 )
 
 # create an instance of Extractor
-extrator = Extractor()
+extractor = Extractor()
 
 def scrapeData(url: str):
     # create a dataframe
@@ -45,7 +45,8 @@ def scrapeData(url: str):
         extractor.load_url_page(url)
     except WebDriverException as e:
         st.toast('Please check your network connection for internet access')
-        extractor.retry(extractor.load_url_page, args=(url))
+
+        extractor.retry(extractor.load_url_page, [url])
 
     index = 1
     while extractor.click_restaurant():
@@ -66,7 +67,7 @@ def scrapeData(url: str):
         df.loc[len(df)] = new_row
 
         # display new row
-        st.table(pd.DataFrame(data), index=[0])
+        st.table(pd.DataFrame(data), index=range(1, 11, 1))
 
         print(data, '\n')
         index += 1
