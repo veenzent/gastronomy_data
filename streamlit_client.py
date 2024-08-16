@@ -45,7 +45,6 @@ def scrapeData(url: str):
         extractor.load_url_page(url)
     except WebDriverException as e:
         st.toast('Please check your network connection for internet access')
-
         extractor.retry(extractor.load_url_page, [url])
 
     index = 1
@@ -67,7 +66,7 @@ def scrapeData(url: str):
         df.loc[len(df)] = new_row
 
         # display new row
-        st.table(pd.DataFrame(data), index=range(1, 11, 1))
+        st.table(pd.DataFrame(data))
 
         print(data, '\n')
         index += 1

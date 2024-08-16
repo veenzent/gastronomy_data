@@ -5,7 +5,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import NoSuchElementException, ElementNotInteractableException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service as ChromeService
 
@@ -41,12 +41,12 @@ class RestaurantScraper:
         sleep(2)
         print("URL fetched \n")
 
-    def retry(self, func, args, kwargs):
+    def retry(self, func, *args, **kwargs):
         attempts = kwargs.get('attempts', 3)
         delay = kwargs.get('delay', 2)
         for attempt in range(attempts):
             try:
-                return func(*args)
+                return func(*args, **kwargs)
             except Exception as e:
                 if attempt == attempts - 1:
                     raise e
@@ -72,7 +72,10 @@ class Extractor(RestaurantScraper):
         super().__init__()
 
     def click_restaurant(self):
-        restaurant = self.scrape_restaurants()
+        try:
+            restaurant = self.scrape_restaurants()
+        except TimeoutException as e:
+            restaurant = self.retry(self.scrape_restaurants)
         if restaurant:
             restaurant.click()
             self.wait.until(
