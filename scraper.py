@@ -41,6 +41,17 @@ class RestaurantScraper:
         sleep(2)
         print("URL fetched \n")
 
+    def retry(func, args, kwargs):
+        attempts = kwargs.get('attempts', 3)
+        delay = kwargs,get('delay', 2)
+        for attempt in range(attempts):
+            try:
+                return func(*args)
+            except Exception as e:
+                if attempt == attempts - 1:
+                    raise e
+                sleep(delay)
+
     def scrape_restaurants(self):
         restaurants = self.wait.until(
             EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a.vwVdIc")))
