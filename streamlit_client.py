@@ -45,7 +45,7 @@ def scrapeData(url: str):
         extractor.load_url_page(url)
     except WebDriverException as e:
         st.toast('Please check your network connection for internet access')
-        extractor.retry(extractor.load_url_page, [url])
+        extractor.retry(extractor.load_url_page, [url], {'delay': 2, 'attempts': 3})
 
     index = 1
     while extractor.click_restaurant():
