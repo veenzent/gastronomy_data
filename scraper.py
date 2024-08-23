@@ -42,15 +42,15 @@ class RestaurantScraper:
         print("URL fetched \n")
 
     def retry(self, func, *args, **kwargs):
-        attempts = kwargs.get('attempts', 3)
-        delay = kwargs.get('delay', 2)
-        for attempt in range(attempts):
+        self.attempts = kwargs.get('attempts', 3)
+        self.delay = kwargs.get('delay', 2)
+        for attempt in range(self.attempts):
             try:
                 return func(*args, **kwargs)
             except Exception as e:
-                if attempt == attempts - 1:
+                if attempt == self.attempts - 1:
                     raise e
-                sleep(delay)
+                sleep(self.delay)
 
     def scrape_restaurants(self):
         print("Scraping restaurants...")

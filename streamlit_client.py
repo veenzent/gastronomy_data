@@ -66,7 +66,7 @@ def scrapeData(url: str):
         df.loc[len(df)] = new_row
 
         # display new row
-        st.table(pd.DataFrame(data))
+        st.table(pd.DataFrame(data, index=[0]))
 
         print(data, '\n')
         index += 1
